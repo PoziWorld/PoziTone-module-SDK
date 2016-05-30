@@ -8,12 +8,23 @@
   Table of Contents:
 
     Api
+      getApiVersion()
       init()
       connectModule()
       onConnectModuleResponse()
+      openModuleSettings()
       sendMediaEvent()
+      processRequest()
+      forwardCallToTab()
+      processButtonCall()
+      processCommandCall()
+      createCallString()
+      sendError()
+      sendResponse()
       setMediaInfo()
       convertImageSrcToDataUrl()
+      convertVolumeToPercent()
+      convertPercentToVolume()
 
  ============================================================================ */
 
@@ -21,9 +32,23 @@
   'use strict';
 
   function Api() {
-    this.strVersion = '0.1';
+    var strVersion = '0.2';
 
     this.strMediaInfoDivider = ' – ';
+    this.strCallDivider = '/';
+    this.strTriggerPlayerActionMethodPrefix = 'triggerPlayerAction_';
+
+    /**
+     * Return API version.
+     *
+     * @type    method
+     * @param   No Parameters Taken
+     * @return  string
+     **/
+
+    Api.prototype.getApiVersion = function () {
+      return strVersion;
+    };
   }
 
   /**
@@ -32,15 +57,17 @@
    * @type    method
    * @param   strPozitoneEdition
    *            PoziTone edition (alpha, beta, stable, test).
+   * @param   pageWatcher
+   *            Save PageWatcher instance.
    * @return  void
    **/
 
-  Api.prototype.init = function ( strPozitoneEdition ) {
+  Api.prototype.init = function ( strPozitoneEdition, pageWatcher ) {
     var objPozitoneEditions = {
-        'alpha' : 'lbjkjmmcckjjijnnhdabbnkddgmpinhc'    
-      , 'beta' : 'hfdnjjobhcbkciapachaegijeednggeh'    
-      , 'stable' : 'bdglbogiolkffcmojmmkipgnpkfipijm'    
-      , 'test' : 'ioiggdgamcfglpihfidbphgoofpmncfi'    
+        'alpha' : 'lbjkjmmcckjjijnnhdabbnkddgmpinhc'
+      , 'beta' : 'hfdnjjobhcbkciapachaegijeednggeh'
+      , 'stable' : 'bdglbogiolkffcmojmmkipgnpkfipijm'
+      , 'test' : 'ioiggdgamcfglpihfidbphgoofpmncfi'
     };
 
     if ( typeof strPozitoneEdition !== 'string'
@@ -50,6 +77,7 @@
     }
 
     this.strPozitoneId = objPozitoneEditions[ strPozitoneEdition ];
+    this.pageWatcher = pageWatcher;
   };
 
   /**
@@ -73,18 +101,25 @@
         this.strPozitoneId
       , {
           objPozitoneApiRequest : {
-              strVersion : self.strVersion
+              strVersion : self.getApiVersion()
             , strCall : 'module'
             , strMethod : 'POST'
             , objData : objSettings
           }
         }
       , function ( objResponse ) {
-          // TODO: Handle a case when objResponse is undefined
+          // PoziTone is not found
+          if ( typeof objResponse !== 'object' || Array.isArray( objResponse ) ) {
+            self.onConnectModuleResponse( funcErrorCallback, objResponse, 404 );
+
+            return;
+          }
+
           objResponse = objResponse.objPozitoneApiResponse;
 
+          // Bad response (treat as bad request)
           if ( typeof objResponse !== 'object' || Array.isArray( objResponse ) ) {
-            self.onConnectModuleResponse( funcErrorCallback, objResponse );
+            self.onConnectModuleResponse( funcErrorCallback, objResponse, 400 );
 
             return;
           }
@@ -93,10 +128,20 @@
 
           // https://developer.mozilla.org/en-US/docs/Web/HTTP/Response_codes
           if ( typeof intStatusCode !== 'number' || intStatusCode < 100 || intStatusCode > 399 ) {
-            self.onConnectModuleResponse( funcErrorCallback, objResponse );
+            self.onConnectModuleResponse(
+                funcErrorCallback
+              , objResponse
+              , intStatusCode
+              , objResponse.strApiVersion
+            );
           }
           else {
-            self.onConnectModuleResponse( funcSuccessCallback, objResponse );
+            self.onConnectModuleResponse(
+                funcSuccessCallback
+              , objResponse
+              , intStatusCode
+              , objResponse.strApiVersion
+            );
           }
         }
     );
@@ -111,13 +156,55 @@
    *            Function to run.
    * @param   objResponse
    *            Response object.
+   * @param   intStatusCode
+   *            Response code as defined at
+   *            https://developer.mozilla.org/en-US/docs/Web/HTTP/Response_codes
+   * @param   strApiVersion
+   *            Optional. PoziTone Host API version
    * @return  void
    **/
 
-  Api.prototype.onConnectModuleResponse = function ( funcCallback, objResponse ) {
+  Api.prototype.onConnectModuleResponse = function (
+      funcCallback
+    , objResponse
+    , intStatusCode
+    , strApiVersion
+  ) {
     if ( typeof funcCallback === 'function' ) {
-      funcCallback( objResponse );
+      funcCallback( objResponse, intStatusCode, strApiVersion );
     }
+  };
+
+  /**
+   * Open module settings subpage in PoziTone Options page.
+   *
+   * @type    method
+   * @param   strModuleId
+   *            Module ID.
+   * @param   funcSuccessCallback
+   *            Optional. Function to run on success.
+   * @param   funcErrorCallback
+   *            Optional. Function to run on error.
+   * @return  void
+   **/
+
+  Api.prototype.openModuleSettings = function ( strModuleId, funcSuccessCallback, funcErrorCallback ) {
+    var self = this;
+
+    // TODO: Make a separate method
+    chrome.runtime.sendMessage(
+        this.strPozitoneId
+      , {
+          objPozitoneApiRequest : {
+              strVersion : self.getApiVersion()
+            , strCall : 'module-settings-page/' + strModuleId
+            , strMethod : 'GET'
+          }
+        }
+      , function ( objResponse ) {
+          // TODO: Add success and error handlers
+        }
+    );
   };
 
   /**
@@ -141,7 +228,7 @@
         this.strPozitoneId
       , {
           objPozitoneApiRequest : {
-              strVersion : self.strVersion
+              strVersion : self.getApiVersion()
             , strCall : 'media'
             , strMethod : 'POST'
             , objData : objData
@@ -158,6 +245,310 @@
           }
         }
     );
+  };
+
+  /**
+   * Process PoziTone API request.
+   *
+   * @type    method
+   * @param   objMessage
+   *            Message received.
+   * @param   objSender
+   *            Sender of a message.
+   * @param   funcSendResponse
+   *            Used to send a response.
+   * @return  void
+   **/
+
+  Api.prototype.processRequest = function ( objMessage, objSender, funcSendResponse ) {
+    var objRequest = objMessage.objPozitoneApiRequest;
+
+    if ( typeof objRequest === 'object' && ! Array.isArray( objRequest ) ) {
+      if ( ! this.isEmpty( objRequest ) ) {
+        var strCall = objRequest.strCall;
+
+        if ( typeof strCall === 'string' ) {
+          if ( strCall !== '' ) {
+            var strMethod = objRequest.strMethod;
+
+            if ( typeof strMethod === 'string' ) {
+              if ( strMethod !== '' ) {
+                var arrCall = strCall.split( '/' )
+                  , strPrimaryCall = arrCall[ 0 ]
+                  ;
+
+                if ( strPrimaryCall === 'tab' ) {
+                  this.forwardCallToTab( objRequest, objSender, funcSendResponse, arrCall );
+                }
+                else if ( strPrimaryCall === 'button' ) {
+                  this.processButtonCall( objRequest, objSender, funcSendResponse, arrCall );
+                }
+                else if ( strPrimaryCall === 'command' ) {
+                  this.processCommandCall( objRequest, objSender, funcSendResponse, arrCall );
+                }
+                else {
+                  this.sendError( funcSendResponse, 4 );
+                }
+              }
+              else {
+                this.sendError( funcSendResponse, 5 );
+              }
+            }
+            else {
+              this.sendError( funcSendResponse, 1, 'strMethod', 'string' );
+            }
+          }
+          else {
+            this.sendError( funcSendResponse, 3 );
+          }
+        }
+        else {
+          this.sendError( funcSendResponse, 1, 'strCall', 'string' );
+        }
+      }
+      else {
+        this.sendError( funcSendResponse, 2 );
+      }
+    }
+    else if ( typeof objRequest !== 'undefined' ) {
+      this.sendError( funcSendResponse, 1, 'objPozitoneApiRequest', 'object' );
+    }
+    else {
+      this.sendError( funcSendResponse, 0 );
+    }
+  };
+
+  /**
+   * If the recipient is a tab, forward the call to that tab.
+   *
+   * @type    method
+   * @param   objRequest
+   *            API request properties object.
+   * @param   objSender
+   *            Sender of a message.
+   * @param   funcSendResponse
+   *            Used to send a response.
+   * @param   arrCall
+   *            Call "path" tree.
+   * @return  void
+   **/
+
+  Api.prototype.forwardCallToTab = function ( objRequest, objSender, funcSendResponse, arrCall ) {
+    var intTabId = parseInt( arrCall[ 1 ] );
+
+    arrCall = arrCall.slice( 2 );
+
+    chrome.tabs.sendMessage(
+        intTabId
+      , {
+          objPozitoneApiRequest : {
+              strVersion : this.getApiVersion()
+            , strCall : this.createCallString( arrCall )
+            , strMethod : 'GET'
+          }
+        }
+      , function ( objResponse ) {
+          if ( typeof funcSendResponse === 'function' ) {
+            funcSendResponse( objResponse );
+          }
+          else {
+            // TODO: Add
+          }
+        }
+    );
+  };
+
+  /**
+   * Process PoziTone API 'button' call.
+   *
+   * @type    method
+   * @param   objRequest
+   *            API request properties object.
+   * @param   objSender
+   *            Sender of a message.
+   * @param   funcSendResponse
+   *            Used to send a response.
+   * @param   arrCall
+   *            Call "path" tree.
+   * @return  void
+   **/
+
+  Api.prototype.processButtonCall = function ( objRequest, objSender, funcSendResponse, arrCall ) {
+    var strMethod = objRequest.strMethod;
+
+    if ( strMethod === 'GET' ) {
+      var strButton = arrCall[ 1 ];
+
+      if ( typeof strButton === 'string' && strButton !== '' ) {
+        var pageWatcher = this.pageWatcher;
+
+        // TODO: Combine with 'command'
+        var funcToProceedWith = pageWatcher[ this.strTriggerPlayerActionMethodPrefix + strButton ];
+
+        if ( typeof funcToProceedWith === 'function' ) {
+          funcToProceedWith.call( pageWatcher );
+        }
+        else {
+          // TODO: Add more error handling
+        }
+      }
+      else {
+        this.sendError( funcSendResponse, 1, 'strButton', 'string' );
+      }
+    }
+    else {
+      this.sendError( funcSendResponse, 6, strMethod );
+    }
+  };
+
+  /**
+   * Process PoziTone API 'command' call.
+   *
+   * @type    method
+   * @param   objRequest
+   *            API request properties object.
+   * @param   objSender
+   *            Sender of a message.
+   * @param   funcSendResponse
+   *            Used to send a response.
+   * @param   arrCall
+   *            Call "path" tree.
+   * @return  void
+   **/
+
+  Api.prototype.processCommandCall = function ( objRequest, objSender, funcSendResponse, arrCall ) {
+    var strMethod = objRequest.strMethod;
+
+    if ( strMethod === 'GET' ) {
+      var strCommand = arrCall[ 1 ];
+
+      if ( typeof strCommand === 'string' && strCommand !== '' ) {
+        var pageWatcher = this.pageWatcher;
+
+        if ( strCommand === 'status' ) {
+          var objResponse = {
+              boolIsReady : pageWatcher.objPlayerInfo.boolIsReady
+            , strModule : pageWatcher.objPlayerInfo.strModule
+          };
+
+          funcSendResponse( objResponse );
+        }
+        else {
+          // TODO: Combine with 'button'
+          var funcToProceedWith = pageWatcher[ this.strTriggerPlayerActionMethodPrefix + strCommand ];
+
+          if ( typeof funcToProceedWith === 'function' ) {
+            funcToProceedWith.call( pageWatcher );
+          }
+          else {
+            // TODO: Add more error handling
+          }
+        }
+      }
+      else {
+        this.sendError( funcSendResponse, 1, 'strButton', 'string' );
+      }
+    }
+    else {
+      this.sendError( funcSendResponse, 6, strMethod );
+    }
+  };
+
+  /**
+   * Provide array of call parameters, get call string.
+   *
+   * @type    method
+   * @param   arrCallParameters
+   *            Array of call parameters.
+   * @return  string
+   **/
+
+  Api.prototype.createCallString = function ( arrCallParameters ) {
+    return arrCallParameters.join( this.strCallDivider );
+  };
+
+  /**
+   * Send PoziTone API request error to the sender.
+   *
+   * @type    method
+   * @param   funcSendResponse
+   *            Used to send a response.
+   * @param   intErrorCode
+   *            API error code.
+   * @param   strErrorMessageArg1
+   *            Optional. Argument to be a part of the error message.
+   * @param   strErrorMessageArg2
+   *            Optional. Argument to be a part of the error message.
+   * @return  void
+   **/
+
+  Api.prototype.sendError = function (
+      funcSendResponse
+    , intErrorCode
+    , strErrorMessageArg1
+    , strErrorMessageArg2
+  ) {
+    var objErrorMessages = {
+            0 : 'UnrecognizedMessage'
+          , 1 : 'TypeofMismatch'
+          , 2 : 'RequestObjectCantBeEmpty'
+          , 3 : 'CallNotSpecified'
+          , 4 : 'CallUnknown'
+          , 5 : 'MethodNotSpecified'
+          , 6 : 'MethodNotSupported'
+          , 7 : 'DataObjectCantBeEmpty'
+        }
+      , objError = {
+            intErrorCode : intErrorCode
+          , strMessage : 'Error' + objErrorMessages[ intErrorCode ]
+          , arrMessageArguments : [ strErrorMessageArg1, strErrorMessageArg2 ]
+          , intStatusCode : 400
+        }
+      ;
+
+    this.sendResponse( funcSendResponse, objError );
+  };
+
+  /**
+   * Send response to the sender of PoziTone API request.
+   *
+   * @type    method
+   * @param   funcSendResponse
+   *            Used to send a response.
+   * @param   objResponseDetails
+   *            Optional. Argument to be a part of the error message.
+   * @return  void
+   **/
+
+  Api.prototype.sendResponse = function ( funcSendResponse, objResponseDetails ) {
+    if ( typeof objResponseDetails !== 'object' || Array.isArray( objResponseDetails ) ) {
+      // TODO: Send 500
+      return;
+    }
+
+    var intStatusCode = objResponseDetails.intStatusCode;
+
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Response_codes
+    if ( typeof intStatusCode !== 'number' || intStatusCode < 100 || intStatusCode > 599 ) {
+      // TODO: Send 500
+      return;
+    }
+
+    var arrMessageArguments = objResponseDetails.arrMessageArguments;
+
+    objResponseDetails.strVersion = this.getApiVersion();
+    objResponseDetails.strStatusText = chrome.i18n.getMessage( 'pozitoneModuleApiStatusCode' + intStatusCode );
+    objResponseDetails.strMessage = chrome.i18n.getMessage(
+        'api' + objResponseDetails.strMessage
+      , arrMessageArguments
+    );
+
+    // Only used for constructing error message
+    if ( Array.isArray( arrMessageArguments ) ) {
+      delete objResponseDetails.arrMessageArguments;
+    }
+
+    funcSendResponse( { objPozitoneApiResponse : objResponseDetails } );
   };
 
   /**
@@ -228,6 +619,51 @@
 
     $$image.setAttribute( 'crossOrigin', 'anonymous');
     $$image.src = strImgSrc;
+  };
+
+  /**
+   * PoziTone operates with %. If the player operates with a 0–1 range,
+   * the value has to be converted.
+   *
+   * @type    method
+   * @param   flVolume
+   *            A floating point volume number.
+   * @return  integer
+   **/
+
+  Api.prototype.convertVolumeToPercent = function ( flVolume ) {
+    return Math.round( flVolume.toFixed( 2 ) * 100 );
+  };
+
+  /**
+   * PoziTone operates with %. If the player operates with a 0–1 range,
+   * the value has to be converted.
+   *
+   * @type    method
+   * @param   intVolume
+   *            A floating point volume number.
+   * @return  float
+   **/
+
+  Api.prototype.convertPercentToVolume = function ( intVolume ) {
+    return parseFloat( ( intVolume / 100 ).toFixed( 2 ) );
+  };
+
+  /**
+   * Check whether the object/array is empty.
+   *
+   * @type    method
+   * @param   objToTest
+   *            Object to check against.
+   * @return  bool
+   **/
+
+  Api.prototype.isEmpty = function ( objToTest ) {
+    for ( var i in objToTest ) {
+      return false;
+    }
+
+    return true;
   };
 
   if ( typeof pozitoneModule === 'undefined' ) {
