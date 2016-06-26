@@ -14,6 +14,7 @@
       onConnectModuleResponse()
       openModuleSettings()
       sendMediaEvent()
+      sendMessage()
       processRequest()
       forwardCallToTab()
       processButtonCall()
@@ -32,7 +33,7 @@
   'use strict';
 
   function Api() {
-    var strVersion = '0.2';
+    var strVersion = '0.3';
 
     this.strMediaInfoDivider = ' – ';
     this.strCallDivider = '/';
@@ -68,6 +69,7 @@
       , 'beta' : 'hfdnjjobhcbkciapachaegijeednggeh'
       , 'stable' : 'bdglbogiolkffcmojmmkipgnpkfipijm'
       , 'test' : 'ioiggdgamcfglpihfidbphgoofpmncfi'
+      , 'built-in' : ''
     };
 
     if ( typeof strPozitoneEdition !== 'string'
@@ -76,7 +78,12 @@
       strPozitoneEdition = 'test';
     }
 
-    this.strPozitoneId = objPozitoneEditions[ strPozitoneEdition ];
+    var strPozitoneId = objPozitoneEditions[ strPozitoneEdition ];
+
+    this.strPozitoneId = strPozitoneId === ''
+                            ? null
+                            : strPozitoneId
+                            ;
     this.pageWatcher = pageWatcher;
   };
 
@@ -96,10 +103,8 @@
   Api.prototype.connectModule = function ( objSettings, funcSuccessCallback, funcErrorCallback ) {
     var self = this;
 
-    // TODO: Make a separate method
-    chrome.runtime.sendMessage(
-        this.strPozitoneId
-      , {
+    self.sendMessage(
+        {
           objPozitoneApiRequest : {
               strVersion : self.getApiVersion()
             , strCall : 'module'
@@ -191,10 +196,8 @@
   Api.prototype.openModuleSettings = function ( strModuleId, funcSuccessCallback, funcErrorCallback ) {
     var self = this;
 
-    // TODO: Make a separate method
-    chrome.runtime.sendMessage(
-        this.strPozitoneId
-      , {
+    self.sendMessage(
+        {
           objPozitoneApiRequest : {
               strVersion : self.getApiVersion()
             , strCall : 'module-settings-page/' + strModuleId
@@ -223,10 +226,8 @@
   Api.prototype.sendMediaEvent = function ( objData, funcSuccessCallback, funcErrorCallback ) {
     var self = this;
 
-    // TODO: Make a separate method
-    chrome.runtime.sendMessage(
-        this.strPozitoneId
-      , {
+    self.sendMessage(
+        {
           objPozitoneApiRequest : {
               strVersion : self.getApiVersion()
             , strCall : 'media'
@@ -245,6 +246,45 @@
           }
         }
     );
+  };
+
+  /**
+   * Send message via chrome.runtime.sendMessage.
+   *
+   * @type    method
+   * @param   objMessage
+   *            Message to send.
+   * @param   funcCallback
+   *            Optional. Function to run on response.
+   * @return  void
+   **/
+
+  Api.prototype.sendMessage = function ( objMessage, funcCallback ) {
+    var strPozitoneId = this.strPozitoneId;
+
+    // External modules
+    if ( strPozitoneId ) {
+      chrome.runtime.sendMessage(
+          strPozitoneId
+        , objMessage
+        , function ( objResponse ) {
+            if ( typeof funcCallback === 'function' ) {
+              funcCallback( objResponse );
+            }
+          }
+      );
+    }
+    // Built-in modules
+    else {
+      chrome.runtime.sendMessage(
+          objMessage
+        , function ( objResponse ) {
+            if ( typeof funcCallback === 'function' ) {
+              funcCallback( objResponse );
+            }
+          }
+      );
+    }
   };
 
   /**
