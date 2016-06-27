@@ -1,0 +1,139 @@
+[PoziTone](https://github.com/PoziWorld/PoziTone) module API<img src="https://github.com/PoziWorld/PoziTone/raw/develop/global/img/pozitone-icon-48.png" width="48" height="48" alt="PoziTone">
+=======
+
+This API lets you create an external PoziTone module – a separate extension which will provide PoziTone [features](https://github.com/PoziWorld/PoziTone/blob/master/README_en.md#features) to not yet [supported online media players](https://github.com/PoziWorld/PoziTone/blob/master/README_en.md#supported-online-media-players).
+
+Such external PoziTone module gets published separately from PoziTone allowing you to get a proper credit for your work.
+
+___
+
+##### Table of contents
+
+  * [Include API file](#include-api-file)
+  * [Initialize API](#initialize-api)
+  * [Connect with PoziTone](#connect-with-pozitone)
+  * [To be continued](#to-be-continued)
+
+___
+
+Include API file
+--------
+
+PoziTone module API is written in ES5 and doesn't have any dependencies.
+
+Include the [API JavaScript file](pozitone-module-api.js) before any other JavaScript files.
+
+```javascript
+// Remember to replace "/path/to/"
+<script src="/path/to/pozitone-module-api.js"></script>
+```
+
+<sup>[(back to table of contents)](#table-of-contents)</sup>
+
+
+Initialize API
+--------
+
+Before your module can make any calls to the API, you need to initialize the API and provide an appropriate PoziTone “edition” name.
+
+There are four PoziTone editions available:
+* _[alpha](https://chrome.google.com/webstore/detail/pozitone-alpha/lbjkjmmcckjjijnnhdabbnkddgmpinhc)_ – may contain new features that are unstable and need to be properly tested before being released to everybody.
+* _[beta](https://chrome.google.com/webstore/detail/pozitone-beta/hfdnjjobhcbkciapachaegijeednggeh)_ – may contain new features that have been tested, but need more testing before being released to everybody.
+* _[stable](https://chrome.google.com/webstore/detail/pozitone/bdglbogiolkffcmojmmkipgnpkfipijm)_ – the version of PoziTone that gets released to everybody and shouldn't have major issues.
+* _test_ – downloaded from the [source](https://github.com/PoziWorld/PoziTone) and loaded unpacked in Developer mode. _(Sometimes extension ID of such edition doesn't match the one hardcoded in the API. The fix is on the way.)_
+
+```javascript
+// Specify PoziTone edition you will be connecting to: 'alpha', 'beta', 'stable', or 'test'.
+pozitoneModule.api.init( 'stable' );
+```
+
+_This is done only once per component/class/script/page._
+
+<sup>[(back to table of contents)](#table-of-contents)</sup>
+
+
+___
+
+Connect with PoziTone
+--------
+
+Before your module is able to utilize any PoziTone [features](https://github.com/PoziWorld/PoziTone/blob/master/README_en.md#features), you need to connect it with PoziTone.
+
+```javascript
+/**
+ * Send request to PoziTone to connect the module.
+ *
+ * @type    method
+ * @param   objSettings
+ *            Module settings.
+ * @param   funcSuccessCallback
+ *            Optional. Function to run on success.
+ * @param   funcErrorCallback
+ *            Optional. Function to run on error.
+ * @return  void
+ **/
+
+pozitoneModule.api.connectModule( objSettings, funcSuccessCallback, funcErrorCallback );
+```
+where
+```javascript
+const objSettings = {
+  objSettings_com_example : { // Replace com_example (for example, com_github if your module is for github.com)
+      strName : 'Example'
+    , boolIsEnabled : true
+    , boolShowNotificationLogo : true
+    , strNotificationLogo : 'site' // Other options: 'station'
+    , strNotificationTitleFormat : 'short' // Optional. Other options: 'long', 'noStationInfo'
+    , arrAvailableNotificationTitleFormats : [ // Optional. If multiple are available
+          'short'
+        , 'long'
+        , 'noStationInfo'
+      ]
+    , arrAvailableNotificationButtons : [ // Choose only the applicable ones
+          'add'
+        , 'addAuth'
+        , 'favorite'
+        , 'favoriteAuth'
+        , 'next'
+        , 'nextAuth'
+        , 'previous'
+        , 'previousAuth'
+        , 'playStop'
+        , 'muteUnmute'
+        , 'volumeUp'
+        , 'volumeDown'
+      ]
+    , arrActiveNotificationButtons : [ // Two active buttons maximum. Any from the available ones
+          'playStop'
+        , 'muteUnmute'
+      ]
+    , boolShowNotificationWhenStopped : false // Optional
+    , boolShowNotificationWhenMuted : false
+    , boolShowNotificationWhenNoTrackInfo : false // Optional
+    , boolUseGeneralVolumeDelta : true // Optional
+    , intVolumeDelta : 10 // Optional
+    , strRegex : '(http:\/\/|https:\/\/)example.com\/.*'
+  }
+};
+```
+
+Once connected, you can offer user to open the module settings subpage/section within PoziTone Options page.
+
+```javascript
+// Replace com_example with the appropriate name
+pozitoneModule.api.openModuleSettings( 'com_example' );
+```
+
+<sup>[(back to table of contents)](#table-of-contents)</sup>
+
+
+___
+
+To be continued
+--------
+
+This document is a work-in-progress and will be updated with more instructions soon...
+
+If you are already starting on your external PoziTone module, please consider checking [Sovyatnik external PoziTone module](https://github.com/PoziWorld/Sovyatnik-external-PoziTone-module) which fully utilizes this API.
+
+<sup>[(back to table of contents)](#table-of-contents)</sup>
