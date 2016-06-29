@@ -1,7 +1,7 @@
 [PoziTone](https://github.com/PoziWorld/PoziTone) module API<img src="https://github.com/PoziWorld/PoziTone/raw/develop/global/img/pozitone-icon-48.png" width="48" height="48" alt="PoziTone">
 =======
 
-This API lets you create an external PoziTone module – a separate extension which will provide PoziTone [features](https://github.com/PoziWorld/PoziTone/blob/master/README_en.md#features) to not yet [supported online media players](https://github.com/PoziWorld/PoziTone/blob/master/README_en.md#supported-online-media-players).
+This API lets you create an external PoziTone module – a standalone extension which will provide PoziTone [features](https://github.com/PoziWorld/PoziTone/blob/master/README_en.md#features) to not yet [supported online media players](https://github.com/PoziWorld/PoziTone/blob/master/README_en.md#supported-online-media-players).
 
 Such external PoziTone module gets published separately from PoziTone allowing you to get a proper credit for your work.
 
@@ -12,6 +12,7 @@ ___
   * [Include API file](#include-api-file)
   * [Initialize API](#initialize-api)
   * [Connect with PoziTone](#connect-with-pozitone)
+  * [Modules utilizing this API](#modules-utilizing-this-api)
   * [To be continued](#to-be-continued)
 
 ___
@@ -129,11 +130,20 @@ pozitoneModule.api.openModuleSettings( 'com_example' );
 
 ___
 
+Modules utilizing this API
+--------
+
+* [SoundCloud Widget | external PoziTone module](https://github.com/PoziWorld/SoundCloud-Widget-external-PoziTone-module)
+* [Sovyatnik | external PoziTone module](https://github.com/PoziWorld/Sovyatnik-external-PoziTone-module)
+
+<sup>[(back to table of contents)](#table-of-contents)</sup>
+
+
+___
+
 To be continued
 --------
 
 This document is a work-in-progress and will be updated with more instructions soon...
-
-If you are already starting on your external PoziTone module, please consider checking [Sovyatnik external PoziTone module](https://github.com/PoziWorld/Sovyatnik-external-PoziTone-module) which fully utilizes this API.
 
 <sup>[(back to table of contents)](#table-of-contents)</sup>
