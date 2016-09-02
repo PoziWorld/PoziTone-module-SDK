@@ -133,6 +133,7 @@ ___
 Modules utilizing this API
 --------
 
+* [YouTube embedded player | external PoziTone module](https://github.com/PoziWorld/YouTube-Embedded-Player-external-PoziTone-module)
 * [SoundCloud Widget | external PoziTone module](https://github.com/PoziWorld/SoundCloud-Widget-external-PoziTone-module)
 * [Sovyatnik | external PoziTone module](https://github.com/PoziWorld/Sovyatnik-external-PoziTone-module)
 
