@@ -1,7 +1,7 @@
-[PoziTone](https://github.com/PoziWorld/PoziTone) module API<img src="https://github.com/PoziWorld/PoziTone/raw/develop/global/img/pozitone-icon-48.png" width="48" height="48" alt="PoziTone">
+[PoziTone](https://github.com/PoziWorld/PoziTone) module SDK<img src="https://github.com/PoziWorld/PoziTone/raw/develop/global/img/pozitone-icon-48.png" width="48" height="48" alt="PoziTone">
 =======
 
-This API lets you create an external PoziTone module – a standalone extension which will provide PoziTone [features](https://github.com/PoziWorld/PoziTone/blob/master/README_en.md#features) to not yet [supported online media players](https://github.com/PoziWorld/PoziTone/blob/master/README_en.md#supported-online-media-players).
+This SDK lets you create an external PoziTone module – a standalone extension which will provide PoziTone [features](https://github.com/PoziWorld/PoziTone/blob/master/README_en.md#features) to not yet [supported online media players](https://github.com/PoziWorld/PoziTone/blob/master/README_en.md#supported-online-media-players).
 
 Such external PoziTone module gets published separately from PoziTone allowing you to get a proper credit for your work.
 
@@ -9,43 +9,43 @@ ___
 
 ##### Table of contents
 
-  * [Include API file](#include-api-file)
-  * [Initialize API](#initialize-api)
+  * [Include SDK file](#include-sdk-file)
+  * [Initialize SDK](#initialize-sdk)
   * [Connect with PoziTone](#connect-with-pozitone)
-  * [Modules utilizing this API](#modules-utilizing-this-api)
+  * [Modules utilizing this SDK](#modules-utilizing-this-sdk)
   * [To be continued](#to-be-continued)
 
 ___
 
-Include API file
+Include SDK file
 --------
 
-PoziTone module API is written in ES5 and doesn't have any dependencies.
+PoziTone module SDK is written in ES5 and doesn't have any dependencies.
 
-Include the [API JavaScript file](pozitone-module-api.js) before any other JavaScript files.
+Include the [SDK JavaScript file](pozitone-module-sdk.js) before any other JavaScript files.
 
 ```javascript
 // Remember to replace "/path/to/"
-<script src="/path/to/pozitone-module-api.js"></script>
+<script src="/path/to/pozitone-module-sdk.js"></script>
 ```
 
 <sup>[(back to table of contents)](#table-of-contents)</sup>
 
 
-Initialize API
+Initialize SDK
 --------
 
-Before your module can make any calls to the API, you need to initialize the API and provide an appropriate PoziTone “edition” name.
+Before your module can make any calls to the SDK, you need to initialize the SDK and provide an appropriate PoziTone “edition” name.
 
 There are four PoziTone editions available:
 * _[alpha](https://chrome.google.com/webstore/detail/pozitone-alpha/lbjkjmmcckjjijnnhdabbnkddgmpinhc)_ – may contain new features that are unstable and need to be properly tested before being released to everybody.
 * _[beta](https://chrome.google.com/webstore/detail/pozitone-beta/hfdnjjobhcbkciapachaegijeednggeh)_ – may contain new features that have been tested, but need more testing before being released to everybody.
 * _[stable](https://chrome.google.com/webstore/detail/pozitone/bdglbogiolkffcmojmmkipgnpkfipijm)_ – the version of PoziTone that gets released to everybody and shouldn't have major issues.
-* _test_ – downloaded from the [source](https://github.com/PoziWorld/PoziTone) and loaded unpacked in Developer mode. _(Sometimes extension ID of such edition doesn't match the one hardcoded in the API. The fix is on the way.)_
+* _test_ – downloaded from the [source](https://github.com/PoziWorld/PoziTone) and loaded unpacked in Developer mode. _(Sometimes extension ID of such edition doesn't match the one hardcoded in the SDK. The fix is on the way.)_
 
 ```javascript
 // Specify PoziTone edition you will be connecting to: 'alpha', 'beta', 'stable', or 'test'.
-pozitoneModule.api.init( 'stable' );
+pozitoneModule.sdk.init( 'stable' );
 ```
 
 _This is done only once per component/class/script/page._
@@ -74,7 +74,7 @@ Before your module is able to utilize any PoziTone [features](https://github.com
  * @return  void
  **/
 
-pozitoneModule.api.connectModule( objSettings, funcSuccessCallback, funcErrorCallback );
+pozitoneModule.sdk.connectModule( objSettings, funcSuccessCallback, funcErrorCallback );
 ```
 where
 ```javascript
@@ -122,7 +122,7 @@ Once connected, you can offer user to open the module settings subpage/section w
 
 ```javascript
 // Replace com_example with the appropriate name
-pozitoneModule.api.openModuleSettings( 'com_example' );
+pozitoneModule.sdk.openModuleSettings( 'com_example' );
 ```
 
 <sup>[(back to table of contents)](#table-of-contents)</sup>
@@ -130,7 +130,7 @@ pozitoneModule.api.openModuleSettings( 'com_example' );
 
 ___
 
-Modules utilizing this API
+Modules utilizing this SDK
 --------
 
 * [YouTube embedded player | external PoziTone module](https://github.com/PoziWorld/YouTube-Embedded-Player-external-PoziTone-module)
