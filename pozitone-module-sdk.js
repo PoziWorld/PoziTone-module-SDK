@@ -39,7 +39,7 @@
   'use strict';
 
   function Sdk() {
-    var strVersion = '1.0.1'; // semver.org
+    var strVersion = '1.0.2'; // semver.org
 
     this.strMediaInfoDivider = ' – ';
     this.strCallDivider = '/';
@@ -507,7 +507,7 @@
         }
       }
       else {
-        this.sendError( funcSendResponse, 1, 'strButton', 'string' );
+        this.sendError( funcSendResponse, 1, 'strCommand', 'string' );
       }
     }
     else {
