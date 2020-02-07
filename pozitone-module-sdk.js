@@ -57,50 +57,42 @@
   }
 
   /**
-   * Initialize.
+   * Initialize the SDK.
    *
-   * @type    method
-   * @param   strPozitoneEdition
-   *            PoziTone edition (alpha, beta, stable, test).
-   * @param   pageWatcher
-   *            Optional. Save PageWatcher instance.
-   * @param   boolUseOperaAddonId
-   *            Optional. IDs are different for Opera and Yandex.
-   * @return  void
+   * @param {string} pozitoneEdition - PoziTone edition (alpha, beta, stable, test).
+   * @param {PageWatcher} [pageWatcher] - PageWatcher instance to keep for future reference.
+   * @param {boolean} [operaAddonIdForced] - Use Opera (Yandex) extension/addon IDs.
    **/
 
-  Sdk.prototype.init = function ( strPozitoneEdition, pageWatcher, boolUseOperaAddonId ) {
-    var objPozitoneEditions = {
-          'built-in' : ''
-        , 'test' : 'ioiggdgamcfglpihfidbphgoofpmncfi'
-      };
+  Sdk.prototype.init = function ( pozitoneEdition, pageWatcher, operaAddonIdForced ) {
+    var pozitoneEditions = {
+      'built-in': '',
+      'test': 'ioiggdgamcfglpihfidbphgoofpmncfi',
+    };
 
     // Opera or Yandex
-    if ( typeof boolUseOperaAddonId === 'boolean' && boolUseOperaAddonId ) {
-      objPozitoneEditions[ 'stable' ] = 'bnmpcdcpmgfekpcekglbeendkjkflldd';
+    if ( typeof operaAddonIdForced === 'boolean' && operaAddonIdForced ) {
+      pozitoneEditions[ 'stable' ] = 'bnmpcdcpmgfekpcekglbeendkjkflldd';
     }
     // Microsoft Edge (Chromium-based)
     else if ( / Edg/.test( window.navigator.userAgent ) ) {
-      objPozitoneEditions[ 'stable' ] = 'mnfohmojhhcbbnafeehfhghjaeaokjbl';
+      pozitoneEditions[ 'stable' ] = 'mnfohmojhhcbbnafeehfhghjaeaokjbl';
     }
     else {
-      objPozitoneEditions[ 'alpha' ] = 'lbjkjmmcckjjijnnhdabbnkddgmpinhc';
-      objPozitoneEditions[ 'beta' ] = 'hfdnjjobhcbkciapachaegijeednggeh';
-      objPozitoneEditions[ 'stable' ] = 'bdglbogiolkffcmojmmkipgnpkfipijm';
+      pozitoneEditions[ 'alpha' ] = 'lbjkjmmcckjjijnnhdabbnkddgmpinhc';
+      pozitoneEditions[ 'beta' ] = 'hfdnjjobhcbkciapachaegijeednggeh';
+      pozitoneEditions[ 'stable' ] = 'bdglbogiolkffcmojmmkipgnpkfipijm';
     }
 
-    if ( typeof strPozitoneEdition !== 'string'
-      || typeof objPozitoneEditions[ strPozitoneEdition ] !== 'string'
-    ) {
-      strPozitoneEdition = 'test';
+    if ( typeof pozitoneEdition !== 'string' || typeof pozitoneEditions[ pozitoneEdition ] !== 'string' ) {
+      pozitoneEdition = 'test';
     }
 
-    var strPozitoneId = objPozitoneEditions[ strPozitoneEdition ];
+    var pozitoneId = pozitoneEditions[ pozitoneEdition ];
 
-    this.strPozitoneId = strPozitoneId === ''
-                            ? null
-                            : strPozitoneId
-                            ;
+    this.strPozitoneId = pozitoneId === '' ?
+      null :
+      pozitoneId;
     this.pageWatcher = pageWatcher;
   };
 
@@ -926,4 +918,11 @@
   }
 
   pozitoneModule.sdk = new Sdk();
+
+  /**
+   * @typedef {object} PageWatcher
+   * @property {object} objPlayerInfo
+   * @property {boolean} objPlayerInfo.boolIsReady
+   * @property {string} objPlayerInfo.strModule
+   */
 } )();
