@@ -1,4 +1,4 @@
-[PoziTone](https://github.com/PoziWorld/PoziTone) module SDK<img src="https://github.com/PoziWorld/PoziTone/raw/develop/global/img/pozitone-icon-48.png" width="48" height="48" alt="PoziTone">
+[PoziTone](https://github.com/PoziWorld/PoziTone) module SDK<img src="https://github.com/PoziWorld/PoziTone/raw/develop/static/global/img/pozitone-icon-48.png" width="48" height="48" alt="PoziTone">
 =======
 
 This SDK lets you create an external PoziTone module – a standalone extension which will provide PoziTone [features](https://github.com/PoziWorld/PoziTone/blob/master/README_en.md#features) to not yet [supported online media players](https://github.com/PoziWorld/PoziTone/blob/master/README_en.md#supported-online-media-players).
