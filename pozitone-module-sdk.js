@@ -75,15 +75,15 @@
         , 'test' : 'ioiggdgamcfglpihfidbphgoofpmncfi'
       };
 
+    // Opera or Yandex
+    if ( typeof boolUseOperaAddonId === 'boolean' && boolUseOperaAddonId ) {
+      objPozitoneEditions[ 'stable' ] = 'bnmpcdcpmgfekpcekglbeendkjkflldd';
+    }
     // Not Opera or Yandex
-    if ( typeof boolUseOperaAddonId !== 'boolean' || ! boolUseOperaAddonId ) {
+    else {
       objPozitoneEditions[ 'alpha' ] = 'lbjkjmmcckjjijnnhdabbnkddgmpinhc';
       objPozitoneEditions[ 'beta' ] = 'hfdnjjobhcbkciapachaegijeednggeh';
       objPozitoneEditions[ 'stable' ] = 'bdglbogiolkffcmojmmkipgnpkfipijm';
-    }
-    // Opera or Yandex
-    else {
-      objPozitoneEditions[ 'stable' ] = 'bnmpcdcpmgfekpcekglbeendkjkflldd';
     }
 
     if ( typeof strPozitoneEdition !== 'string'
