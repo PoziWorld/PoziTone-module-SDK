@@ -79,7 +79,10 @@
     if ( typeof boolUseOperaAddonId === 'boolean' && boolUseOperaAddonId ) {
       objPozitoneEditions[ 'stable' ] = 'bnmpcdcpmgfekpcekglbeendkjkflldd';
     }
-    // Not Opera or Yandex
+    // Microsoft Edge (Chromium-based)
+    else if ( / Edg/.test( window.navigator.userAgent ) ) {
+      objPozitoneEditions[ 'stable' ] = 'mnfohmojhhcbbnafeehfhghjaeaokjbl';
+    }
     else {
       objPozitoneEditions[ 'alpha' ] = 'lbjkjmmcckjjijnnhdabbnkddgmpinhc';
       objPozitoneEditions[ 'beta' ] = 'hfdnjjobhcbkciapachaegijeednggeh';
