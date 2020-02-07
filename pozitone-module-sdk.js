@@ -2,36 +2,8 @@
 
   Product: PoziTone module SDK
   Author: PoziWorld
-  Copyright: (c) 2016-2017 PoziWorld, Inc.
+  Copyright: (c) 2016-2020 PoziWorld, Inc.
   License: pozitone.com/license
-
-  Table of Contents:
-
-    Sdk
-      getSdkVersion()
-      init()
-      connectModule()
-      onConnectModuleResponse()
-      openModuleSettings()
-      sendMediaEvent()
-      sendMessage()
-      processRequest()
-      forwardCallToTab()
-      processButtonCall()
-      processCommandCall()
-      createCallString()
-      sendError()
-      sendResponse()
-      setMediaInfo()
-      convertImageSrcToDataUrl()
-      convertVolumeToPercent()
-      convertPercentToVolume()
-      changeVolume()
-      getVolumeDeltaSettings()
-      getVoiceControlStatus()
-      activateVoiceControl()
-      addOnVoiceControlDeactivationListener()
-      isEmpty()
 
  ============================================================================ */
 
