@@ -11,7 +11,7 @@
   'use strict';
 
   function Sdk() {
-    var strVersion = '1.0.2'; // semver.org
+    var strVersion = '1.1.0'; // semver.org
 
     this.strMediaInfoDivider = ' – ';
     this.strCallDivider = '/';
